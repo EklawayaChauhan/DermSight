@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Stethoscope, ImagePlus, FileText, X, CornerRightUp } from "lucide-react";
+import { Stethoscope, ImagePlus, FileText, X, CornerRightUp, ShieldCheck, ScanLine, CircleHelp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatSidebar } from "@/components/ChatSidebar";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ThinkingIndicator } from "@/components/ThinkingIndicator";
+import { StartupOverlay } from "@/components/StartupOverlay";
 import { useAutoResizeTextarea } from "@/components/hooks/use-auto-resize-textarea";
 import { streamChat, type Message } from "@/lib/chat";
 import { downloadReport } from "@/lib/report";
@@ -23,6 +24,7 @@ export default function Index() {
   const [dark, setDark] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ file: File; preview: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [startupComplete, setStartupComplete] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -134,43 +136,51 @@ export default function Index() {
   const hasAssessment = messages.some((m) => m.role === "assistant" && m.content !== WELCOME);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
+    <div className={cn("app-shell flex h-screen w-full overflow-hidden bg-background", startupComplete && "app-shell-ready")}>
+      {!startupComplete && <StartupOverlay onComplete={() => setStartupComplete(true)} />}
       <ChatSidebar dark={dark} onToggleDark={() => setDark(!dark)} onNewChat={newChat} />
 
       <main className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card/80 glass-effect">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+        <header className="workspace-header flex min-h-16 items-center justify-between gap-4 border-b border-border bg-card/80 px-5 backdrop-blur-xl sm:px-7">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Stethoscope className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-semibold text-foreground tracking-tight">DermSight AI</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-medium">Beta</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-display text-sm font-semibold tracking-tight text-foreground sm:text-base">DermSight AI</span>
+                <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-secondary">Beta</span>
+              </div>
+              <div className="hidden items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:flex">
+                <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                Consultation space ready
+              </div>
+            </div>
           </div>
-          {hasAssessment && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadReport(messages)}
-              className="gap-2 shadow-soft hover:shadow-glow transition-shadow"
-            >
-              <FileText className="w-4 h-4" />
-              Download Report
-            </Button>
-          )}
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <span className="hidden items-center gap-1.5 rounded-full border border-border bg-background/60 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground md:flex">
+              <ShieldCheck className="h-3.5 w-3.5 text-secondary" /> Private session
+            </span>
+            {hasAssessment && <Button variant="outline" size="sm" onClick={() => downloadReport(messages)} className="gap-2 rounded-xl border-border bg-background/60 text-xs shadow-soft">
+              <FileText className="h-4 w-4" /> <span className="hidden sm:inline">Download report</span>
+            </Button>}
+          </div>
         </header>
 
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-thin">
-          {messages.map((m, i) => (
-            <ChatMessage key={i} message={m} />
-          ))}
-          {loading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
+        <div ref={scrollRef} className="workspace-content flex-1 overflow-y-auto px-4 py-5 scrollbar-thin sm:px-8 sm:py-7">
+          <div className="mx-auto flex max-w-4xl flex-col gap-6">
+            {messages.map((m, i) => (
+              <ChatMessage key={i} message={m} />
+            ))}
+            {loading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
+          </div>
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-border bg-card/80 glass-effect p-4">
-          <div className="max-w-3xl mx-auto">
+        <div className="composer-shell border-t border-border bg-card/80 px-4 pb-4 pt-3 backdrop-blur-xl sm:px-7 sm:pb-5">
+          <div className="mx-auto max-w-4xl">
             {/* Pending image preview */}
             {pendingImage && (
               <div className="mb-3 relative inline-block">
@@ -185,7 +195,7 @@ export default function Index() {
             )}
 
             <div className="relative">
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-2 rounded-2xl border border-border bg-background/75 p-1.5 shadow-soft transition-all focus-within:border-primary/40 focus-within:shadow-glow">
                 <input
                   type="file"
                   ref={fileRef}
@@ -198,7 +208,7 @@ export default function Index() {
                   size="icon"
                   onClick={() => fileRef.current?.click()}
                   disabled={loading}
-                  className="rounded-xl h-11 w-11 flex-shrink-0 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                  className="h-10 w-10 flex-shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                   title="Upload skin image"
                 >
                   <ImagePlus className="w-5 h-5" />
@@ -221,22 +231,22 @@ export default function Index() {
                     placeholder={pendingImage ? "Add a description (optional)..." : "Describe your skin concern..."}
                     disabled={loading}
                     className={cn(
-                      "resize-none rounded-2xl border-input bg-background pr-12 py-3.5 pl-4 text-sm",
+                      "min-h-[48px] resize-none rounded-xl border-0 bg-transparent py-3 pl-3 pr-12 text-sm shadow-none",
                       "focus-visible:ring-primary/30 focus-visible:ring-offset-0",
                       "placeholder:text-muted-foreground/60",
-                      "min-h-[52px] transition-all duration-200"
+                      "transition-all duration-200"
                     )}
                   />
                   <button
                     onClick={send}
                     disabled={(!input.trim() && !pendingImage) || loading}
-                    className={cn(
-                      "absolute right-3 bottom-3 rounded-xl p-1.5 transition-all duration-200",
+                     className={cn(
+                       "absolute bottom-2.5 right-2.5 rounded-xl p-2 transition-all duration-200",
                       loading
                         ? "bg-transparent"
                         : input.trim() || pendingImage
                           ? "bg-primary text-primary-foreground shadow-soft hover:shadow-glow"
-                          : "bg-muted text-muted-foreground"
+                       "bg-muted text-muted-foreground"
                     )}
                     type="button"
                   >
@@ -255,13 +265,35 @@ export default function Index() {
                 </div>
               </div>
 
-              <p className="text-[11px] text-muted-foreground/70 text-center mt-2">
-                {loading ? "✨ AI is analyzing..." : "⚠️ DermSight provides general information only — not medical advice."}
+             <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[10px] font-medium text-muted-foreground/70">
+                {loading ? <><ScanLine className="h-3 w-3 text-secondary" /> AI is reviewing your message...</> : <><CircleHelp className="h-3 w-3" /> General information only — not medical advice.</>}
               </p>
             </div>
           </div>
         </div>
       </main>
+
+      <aside className="hidden w-72 flex-shrink-0 flex-col gap-5 border-l border-border bg-sidebar/25 p-5 xl:flex">
+        <div className="border-b border-border pb-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Session overview</p>
+          <h2 className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground">A calmer way to start</h2>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Share a concern in your own words or add a clear image for general guidance.</p>
+        </div>
+        <div className="space-y-3">
+          <div className="status-rail-item flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary"><ImagePlus className="h-4 w-4" /></div>
+            <div><p className="text-xs font-semibold text-foreground">Image check</p><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Good lighting and a close view help the model respond clearly.</p></div>
+          </div>
+          <div className="status-rail-item flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="h-4 w-4" /></div>
+            <div><p className="text-xs font-semibold text-foreground">Privacy first</p><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Your consultation stays focused on the information you provide.</p></div>
+          </div>
+        </div>
+        <div className="mt-auto rounded-2xl bg-primary p-4 text-primary-foreground shadow-glow">
+          <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-secondary" /><p className="text-xs font-semibold">Ready when you are</p></div>
+          <p className="mt-2 text-[11px] leading-relaxed text-primary-foreground/75">Start with what changed, where it is, and how long you have noticed it.</p>
+        </div>
+      </aside>
     </div>
   );
 }

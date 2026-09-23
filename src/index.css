@@ -1,45 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 25% 97%;
-    --foreground: 220 25% 10%;
+    --background: 206 50% 98%;
+    --foreground: 201 56% 16%;
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 201 56% 16%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
-    --primary: 217 91% 50%;
+    --primary: 201 56% 16%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 217 91% 65%;
-    --secondary: 168 80% 42%;
+    --primary-glow: 192 54% 47%;
+    --secondary: 181 56% 38%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 220 20% 93%;
-    --muted-foreground: 220 10% 46%;
-    --accent: 168 80% 42%;
+    --muted: 200 33% 93%;
+    --muted-foreground: 201 18% 46%;
+    --accent: 181 56% 38%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 90%;
-    --input: 220 13% 87%;
-    --ring: 217 91% 50%;
+    --border: 200 22% 88%;
+    --input: 200 22% 86%;
+    --ring: 181 56% 38%;
     --radius: 0.75rem;
 
-    --sidebar-background: 220 20% 98%;
-    --sidebar-foreground: 220 10% 30%;
-    --sidebar-primary: 217 91% 50%;
+    --sidebar-background: 205 42% 97%;
+    --sidebar-foreground: 201 24% 30%;
+    --sidebar-primary: 181 56% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 91% 96%;
-    --sidebar-accent-foreground: 217 91% 35%;
-    --sidebar-border: 220 13% 92%;
-    --sidebar-ring: 217 91% 50%;
+    --sidebar-accent: 183 34% 92%;
+    --sidebar-accent-foreground: 201 56% 16%;
+    --sidebar-border: 200 22% 89%;
+    --sidebar-ring: 181 56% 38%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%), hsl(168 80% 42%));
-    --shadow-soft: 0 2px 15px -3px hsl(217 91% 50% / 0.08), 0 4px 6px -4px hsl(217 91% 50% / 0.05);
-    --shadow-glow: 0 0 20px hsl(217 91% 50% / 0.15);
+    --gradient-primary: linear-gradient(135deg, hsl(201 56% 16%), hsl(181 56% 38%));
+    --shadow-soft: 0 8px 24px -16px hsl(201 56% 16% / 0.26), 0 2px 6px -3px hsl(201 56% 16% / 0.08);
+    --shadow-glow: 0 0 24px hsl(181 56% 38% / 0.18);
   }
 
   .dark {
@@ -85,8 +83,48 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+     font-family: 'Manrope', 'DM Sans', ui-sans-serif, sans-serif;
   }
+}
+
+@layer components {
+  .font-display { font-family: 'Sora', 'Plus Jakarta Sans', ui-sans-serif, sans-serif; }
+}
+
+@keyframes startup-mark-in {
+  0% { opacity: 0; transform: translateY(10px) scale(.92); filter: blur(8px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes startup-overlay-out {
+  0%, 72% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes startup-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
+}
+@keyframes startup-grid-drift {
+  0% { transform: translateY(0); opacity: .22; }
+  100% { transform: translateY(18px); opacity: .42; }
+}
+@keyframes workspace-reveal {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.startup-overlay { animation: startup-overlay-out 1.5s cubic-bezier(.22,1,.36,1) forwards; }
+.startup-mark { animation: startup-mark-in .65s cubic-bezier(.22,1,.36,1) both; }
+.startup-status-dot { animation: pulse 1.2s ease-in-out infinite; }
+.startup-progress { animation: startup-progress 1.05s cubic-bezier(.22,1,.36,1) .18s both; }
+.startup-grid { background-image: linear-gradient(hsl(var(--secondary) / .12) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--secondary) / .12) 1px, transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); animation: startup-grid-drift 1.5s ease-in-out both; }
+.app-shell:not(.app-shell-ready) > :not(.startup-overlay) { opacity: 0; }
+.app-shell-ready > :not(.startup-overlay) { animation: workspace-reveal .65s cubic-bezier(.22,1,.36,1) both; }
+.status-rail-item { transition: border-color .2s ease, background-color .2s ease, transform .2s ease; }
+.status-rail-item:hover { border-color: hsl(var(--secondary) / .32); background-color: hsl(var(--card)); transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-overlay, .startup-mark, .startup-status-dot, .startup-progress, .startup-grid, .app-shell-ready > :not(.startup-overlay) { animation: none; }
+  .startup-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
+  .app-shell:not(.app-shell-ready) > :not(.startup-overlay), .app-shell-ready > :not(.startup-overlay) { opacity: 1; }
 }
 
 @layer utilities {
