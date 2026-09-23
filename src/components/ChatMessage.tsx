@@ -15,7 +15,7 @@ export function ChatMessage({ message }: { message: Message }) {
       isUser && "flex-row-reverse"
     )}>
       <div className={cn(
-        "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-soft",
+        "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center shadow-soft",
         isUser ? "bg-primary" : "bg-secondary"
       )}>
         {isUser
@@ -24,10 +24,10 @@ export function ChatMessage({ message }: { message: Message }) {
         }
       </div>
       <div className={cn(
-        "max-w-[75%] rounded-2xl px-4 py-3 shadow-soft",
+         "max-w-[75%] rounded-2xl px-4 py-3 shadow-soft sm:px-5",
         isUser
-          ? "bg-primary text-primary-foreground rounded-tr-md"
-          : "bg-card border border-border rounded-tl-md"
+           ? "bg-primary text-primary-foreground rounded-tr-md"
+           : "bg-card/85 border border-border rounded-tl-md"
       )}>
         {message.imageUrl && (
           <img

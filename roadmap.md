@@ -1,1 +1,1 @@
-- [ ] Add DermSight startup animation and clinical dashboard redesign
+- [x] Add DermSight startup animation and clinical dashboard redesign
