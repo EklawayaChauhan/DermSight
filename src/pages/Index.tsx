@@ -246,7 +246,7 @@ export default function Index() {
                         ? "bg-transparent"
                         : input.trim() || pendingImage
                           ? "bg-primary text-primary-foreground shadow-soft hover:shadow-glow"
-                       "bg-muted text-muted-foreground"
+                          : "bg-muted text-muted-foreground"
                     )}
                     type="button"
                   >
