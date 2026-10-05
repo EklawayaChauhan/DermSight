@@ -1,16 +1,17 @@
+import { forwardRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { User, Stethoscope } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Message } from "@/lib/chat";
 
-export function ChatMessage({ message }: { message: Message }) {
+export const ChatMessage = forwardRef<HTMLDivElement, { message: Message }>(({ message }, ref) => {
   const isUser = message.role === "user";
   const textContent = typeof message.content === "string"
     ? message.content
     : message.content.filter((c) => c.type === "text").map((c) => (c as { type: "text"; text: string }).text).join("\n");
 
   return (
-    <div className={cn(
+    <div ref={ref} className={cn(
       "flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300",
       isUser && "flex-row-reverse"
     )}>
@@ -46,4 +47,6 @@ export function ChatMessage({ message }: { message: Message }) {
       </div>
     </div>
   );
-}
+});
+
+ChatMessage.displayName = "ChatMessage";
